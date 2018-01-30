@@ -1,0 +1,39 @@
+Link-quality Telemetry Demo
+
+0. Prerequisites
+* Two or more XR routers with BFD support (e.g. XRv9000, NCS55XX)
+* Linux server with docker and docker-compose installed
+  * e.g. https://docs.docker.com/engine/installation/linux/docker-ce/ubuntu/
+  * e.g. https://docs.docker.com/compose/install/
+
+
+
+1. Initial example configuration (on both devices, e.g.)
+
+bfd
+ echo latency detect
+!
+
+router isis XXXX
+ interface GigabitEthernet0/0/0/X
+  bfd fast-detect ipv4
+ !
+!
+
+To verify, make sure "show bfd session" shows relevant session with state "up".
+
+
+2. Edit .env file (e.g.)
+
+XR_HOST=172.16.1.67
+XR_USER=cisco
+XR_PASS=cisco
+XR_ISIS=XXXX
+XR_INTERFACE=GigabitEthernet0/0/0/X
+
+
+3. Startup
+* Run "docker-compose up kapacitor"
+* Point your browser at port 3000 of your server, login with admin / changeme
+* Induce latency of at least 50 ms on monitored interface, the interface metric should switch to maximum metric in ~15 seconds.
+* Remove latency and the reverse should happen.

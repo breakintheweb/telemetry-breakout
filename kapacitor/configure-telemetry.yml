@@ -1,0 +1,37 @@
+- hosts: all
+  gather_facts: no
+  connection: local
+
+  vars:
+    cli:
+      host: "{{ ansible_ssh_host }}"
+      username: "{{ ansible_ssh_user | default(cisco) }}"
+      password: "{{ ansible_ssh_pass | default(cisco) }}"
+      port: "{{ ansible_ssh_port | default(22) }}"
+
+  tasks:
+    - name: Setting up GRPC
+      iosxr_config:
+        provider: "{{ cli }}"
+        parents:
+            - "grpc"
+        lines:
+            - "port 57777"
+            
+    - name: Setting up telemetry sensor group
+      iosxr_config:
+        provider: "{{ cli }}"
+        parents:
+            - "telemetry model-driven"
+            - "sensor-group mdt-realtime"
+        lines:
+            - "sensor-path Cisco-IOS-XR-ip-bfd-oper:bfd/session-details/session-detail"
+            
+    - name: Setting up telemetry subscription
+      iosxr_config:
+        provider: "{{ cli }}"
+        parents:
+            - "telemetry model-driven"
+            - "subscription mdt-realtime"
+        lines:
+            - "sensor-group-id mdt-realtime sample-interval 1000"

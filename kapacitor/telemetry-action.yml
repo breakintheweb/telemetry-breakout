@@ -1,0 +1,28 @@
+- hosts: all
+  gather_facts: no
+  connection: local
+
+  vars:
+    cli:
+      host: "{{ ansible_ssh_host }}"
+      username: "{{ ansible_ssh_user | default(cisco) }}"
+      password: "{{ ansible_ssh_pass | default(cisco) }}"
+      port: "{{ ansible_ssh_port | default(22) }}"
+
+  tasks:
+    - name: Switch IGP interface
+      iosxr_config:
+        provider: "{{ cli }}"
+        parents:
+          - "router isis {{ isis_name }}"
+          - "interface {{ interface_name }}"
+          - "address-family ipv4 unicast"
+        lines: ["{{ no }} metric maximum"]
+
+    - name: Switch TE interface
+      iosxr_config:
+        provider: "{{ cli }}"
+        parents:
+          - "mpls traffic-eng"
+          - "interface {{ interface_name }}"
+        lines: ["{{ no }} admin-weight 4294967295"]

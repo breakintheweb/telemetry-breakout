@@ -1,0 +1,13 @@
+[
+  {
+    "basepath": "Cisco-IOS-XR-ip-bfd-oper:bfd/session-details/session-detail",
+    "spec": {
+      "fields": [
+        {"name": "interface-name"},
+        {"name": "status-information",
+          "fields": [{"name": "latency-average"}]
+        }
+      ]
+    }
+  }
+]

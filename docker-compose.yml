@@ -1,0 +1,33 @@
+version: '2'
+
+services:
+    influxdb:
+        image: influxdb:1.4.2-alpine
+
+    grafana:
+        image: appcelerator/grafana:grafana-4.6.2
+        volumes: ["./grafana:/etc/extra-config/grafana"]
+        ports: ["3000:3000"]
+
+    kapacitor:
+        build: kapacitor
+        volumes: [".:/tmp/logs"]
+        depends_on: [influxdb, pipeline, grafana]
+        environment:
+            - KAPACITOR_INFLUXDB_0_URLS_0=http://influxdb:8086
+            - INVENTORY=xrv9000 ansible_ssh_host=${XR_HOST} ansible_ssh_user=${XR_USER} ansible_ssh_pass=${XR_PASS}
+            - INTERFACE=${XR_INTERFACE}
+            - ISIS=${XR_ISIS}
+        
+    pipeline:
+        build: pipeline
+        depends_on: [influxdb]
+        environment:
+            - MDT_DIALIN_PORT=57777
+            - MDT_DIALIN_SUBSCRIPTIONS=mdt-realtime
+            - INFLUX_URL=http://influxdb:8086
+            - INFLUX_USERNAME=admin
+            - INFLUX_PASSWORD=admin
+            - INFLUX_DB=mdt_realtime
+            - INFLUX_DB_CREATE=1
+            - MDT_DIALIN_HOST_0=xrv9000 ansible_ssh_host=${XR_HOST} ansible_ssh_user=${XR_USER} ansible_ssh_pass=${XR_PASS}
