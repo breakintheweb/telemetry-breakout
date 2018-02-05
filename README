@@ -15,15 +15,31 @@ bfd
 !
 
 router isis XXXX
+ net XXX
  interface GigabitEthernet0/0/0/X
   bfd fast-detect ipv4
+  address-family ipv4 unicast
+
  !
 !
 
 To verify, make sure "show bfd session" shows relevant session with state "up".
 
+2. grpc dialin config
+grpc
+ port 57777
+ address-family ipv4
+!
+ sensor-group mdt-realtime
+  sensor-path Cisco-IOS-XR-ip-bfd-oper:bfd/session-details/session-detail
+ !
+subscription mdt-realtime
+  sensor-group-id mdt-realtime sample-interval 1500
+ !
 
-2. Edit .env file (e.g.)
+
+
+3. Edit .env file (e.g.)
 
 XR_HOST=172.16.1.67
 XR_USER=cisco
@@ -32,7 +48,7 @@ XR_ISIS=XXXX
 XR_INTERFACE=GigabitEthernet0/0/0/X
 
 
-3. Startup
+4. Startup
 * Run "docker-compose up kapacitor"
 * Point your browser at port 3000 of your server, login with admin / changeme
 * Induce latency of at least 50 ms on monitored interface, the interface metric should switch to maximum metric in ~15 seconds.
